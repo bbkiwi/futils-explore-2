@@ -1,9 +1,9 @@
 (ns futils-explore-2.core
     (:require [clojure.repl :refer :all]
               [clojure.set :as set]
-              [futils.utils :refer :all]
-              [futils.args :refer :all]
-              [futils.named :refer :all]))
+              [futils.utils :as fu]
+              [futils.args :as fa]
+              [futils.named :as fn]))
 
 
 (defn foo
@@ -25,6 +25,7 @@
         ;TODO need to handle not just 3 key case!
         [k1 k2 k3] (keys argm)
         m (merge metavar {:arglists (list (vector k1 k2 k3))})
+        ;m (merge metavar {:arglists (list (vector '(quote a) '(quote b) '(quote cc)))})
         iargm (set/map-invert argm)]
     (println  m)
     (list `def (with-meta uf m)
@@ -46,9 +47,10 @@
         m (merge metavar {:arglists (list (vector k1 k2 k3))})
         iargm (set/map-invert argm)]
     (println  m)
-    `(def ~(with-meta uf m)
-          (fn (~[k1 k2 k3] (~f ~iargm))))))
-
+    `(def (with-meta uf m)
+          (~with-meta
+            (fn (~[k1 k2 k3] (~f ~iargm)))
+            {:rettag (:tag m)}))))
 
 
 (defmacro unnameize-no-meta
